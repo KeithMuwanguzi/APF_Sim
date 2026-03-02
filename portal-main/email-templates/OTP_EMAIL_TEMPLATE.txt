@@ -1,0 +1,12 @@
+Hi {{user_name}},
+
+Your verification code for {{app_name}} is:
+
+{{otp}}
+
+This code expires in {{expires_in}} minutes.
+
+For your security, please don't share this code with anyone. If you didn't request this, you can safely ignore this email.
+
+— The {{app_name}} Team
+Need help? Contact {{support_email}}
