@@ -260,7 +260,7 @@ function handleApiError(error: unknown): never {
 export async function fetchUserProfile(): Promise<UserProfile> {
   try {
     const response = await axios.get<UserProfile>(
-      `${API_BASE_URL}/api/v1/profiles/me/`,
+      `${API_BASE_URL}/api/v1/auth/profile/`,
       {
         headers: getAuthHeaders(),
         timeout: 30000,
@@ -280,7 +280,7 @@ export async function fetchUserProfile(): Promise<UserProfile> {
 export async function updateUserProfile(data: ProfileUpdateData): Promise<UserProfile> {
   try {
     const response = await axios.patch<UserProfile>(
-      `${API_BASE_URL}/api/v1/profiles/me/`,
+      `${API_BASE_URL}/api/v1/auth/profile/`,
       data,
       {
         headers: getAuthHeaders(),
@@ -308,7 +308,7 @@ export async function uploadProfilePicture(file: File): Promise<{
     formData.append('profile_picture', file);
 
     const response = await axios.post(
-      `${API_BASE_URL}/api/v1/profiles/upload-picture/`,
+      `${API_BASE_URL}/api/v1/auth/profile/upload-picture/`,
       formData,
       {
         headers: getMultipartHeaders(),
@@ -332,7 +332,7 @@ export async function removeProfilePicture(): Promise<{
 }> {
   try {
     const response = await axios.delete(
-      `${API_BASE_URL}/api/v1/profiles/remove-picture/`,
+      `${API_BASE_URL}/api/v1/auth/profile/remove-picture/`,
       {
         headers: getAuthHeaders(),
         timeout: 30000,
@@ -355,7 +355,7 @@ export async function updatePrivacySettings(settings: PrivacySettings): Promise<
 }> {
   try {
     const response = await axios.patch(
-      `${API_BASE_URL}/api/v1/profiles/privacy-settings/`,
+      `${API_BASE_URL}/api/v1/auth/profile/privacy-settings/`,
       settings,
       {
         headers: getAuthHeaders(),
@@ -379,7 +379,7 @@ export async function updateNotificationPreferences(preferences: NotificationPre
 }> {
   try {
     const response = await axios.patch(
-      `${API_BASE_URL}/api/v1/profiles/notification-preferences/`,
+      `${API_BASE_URL}/api/v1/auth/profile/notification-preferences/`,
       preferences,
       {
         headers: getAuthHeaders(),
@@ -400,7 +400,7 @@ export async function updateNotificationPreferences(preferences: NotificationPre
 export async function getProfileCompletionStatus(): Promise<ProfileCompletionStatus> {
   try {
     const response = await axios.get<ProfileCompletionStatus>(
-      `${API_BASE_URL}/api/v1/profiles/completion-status/`,
+      `${API_BASE_URL}/api/v1/auth/profile/completion-status/`,
       {
         headers: getAuthHeaders(),
         timeout: 30000,
@@ -420,7 +420,7 @@ export async function getProfileCompletionStatus(): Promise<ProfileCompletionSta
 export async function getProfileActivityLog(): Promise<{ activities: ProfileActivity[] }> {
   try {
     const response = await axios.get(
-      `${API_BASE_URL}/api/v1/profiles/activity-log/`,
+      `${API_BASE_URL}/api/v1/auth/profile/activity-log/`,
       {
         headers: getAuthHeaders(),
         timeout: 30000,

@@ -96,7 +96,7 @@ function getAuthHeaders(): Record<string, string> {
 export async function fetchDashboardStatistics(): Promise<DashboardStatistics> {
   try {
     const response = await axios.get<DashboardStatistics>(
-      `${API_BASE_URL}/api/v1/statistics/`,
+      `${API_BASE_URL}/api/v1/applications/statistics/`,
       {
         headers: getAuthHeaders(),
         timeout: 30000,
@@ -158,7 +158,7 @@ export async function fetchTotalMembers(): Promise<number> {
 export async function fetchRecentApplications(limit: number = 5): Promise<RecentApplication[]> {
   try {
     const response = await axios.get<RecentApplication[]>(
-      `${API_BASE_URL}/api/v1/recent-applications/`,
+      `${API_BASE_URL}/api/v1/applications/recent/`,
       {
         headers: getAuthHeaders(),
         params: { limit },
@@ -179,7 +179,7 @@ export async function fetchRecentApplications(limit: number = 5): Promise<Recent
 export async function fetchRecentPayments(limit: number = 5): Promise<RecentPayment[]> {
   try {
     const response = await axios.get<RecentPayment[]>(
-      `${API_BASE_URL}/api/v1/recent-payments/`,
+      `${API_BASE_URL}/api/v1/applications/recent-payments/`,
       {
         headers: getAuthHeaders(),
         params: { limit },

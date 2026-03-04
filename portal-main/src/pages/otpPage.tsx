@@ -13,7 +13,6 @@ function OtpPage() {
   const [isVerifying, setIsVerifying] = useState(false)
   const [error, setError] = useState('')
   const [sessionId, setSessionId] = useState('')
-  const [rememberMe, setRememberMe] = useState(false)
   const [email, setEmail] = useState('')
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
@@ -21,7 +20,6 @@ function OtpPage() {
   useEffect(() => {
     // Get session_id from sessionStorage
     const storedSessionId = sessionStorage.getItem('otp_session_id')
-    const storedRememberMe = sessionStorage.getItem('remember_me') === 'true'
     const storedEmail = sessionStorage.getItem('login_email') || ''
     
     if (!storedSessionId) {
@@ -31,7 +29,6 @@ function OtpPage() {
     }
     
     setSessionId(storedSessionId)
-    setRememberMe(storedRememberMe)
     setEmail(storedEmail)
     inputRefs.current[0]?.focus()
   }, [navigate])
@@ -87,7 +84,6 @@ function OtpPage() {
         body: JSON.stringify({
           session_id: sessionId,
           otp: otpCode,
-          remember_me: rememberMe,
         }),
       })
 
@@ -106,7 +102,6 @@ function OtpPage() {
         
         // Clear session storage
         sessionStorage.removeItem('otp_session_id')
-        sessionStorage.removeItem('remember_me')
         sessionStorage.removeItem('login_email')
         
         // Redirect based on role

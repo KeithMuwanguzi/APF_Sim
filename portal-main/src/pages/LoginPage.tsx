@@ -12,7 +12,6 @@ function LoginPage() {
   const navigate = useNavigate()
 
   const [showPassword, setShowPassword] = useState(false)
-  const [rememberMe, setRememberMe] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -59,7 +58,6 @@ function LoginPage() {
 
         // Regular flow - store session info for OTP verification
         sessionStorage.setItem('otp_session_id', data.session_id)
-        sessionStorage.setItem('remember_me', rememberMe.toString())
         sessionStorage.setItem('login_email', email)
 
         // OTP email is sent by backend automatically
@@ -164,20 +162,8 @@ function LoginPage() {
               </div>
             </div>
 
-            {/* Remember + Forgot */}
-            <div className="flex items-center justify-between text-xs text-gray-600">
-
-              <label className="flex items-center gap-2 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  disabled={loading}
-                  className="accent-purple-600 disabled:cursor-not-allowed"
-                />
-                Remember me
-              </label>
-
+            {/* Forgot password */}
+            <div className="flex items-center justify-end text-xs text-gray-600">
               <Link
                 to="/forgot-password"
                 className="text-purple-600 hover:underline"

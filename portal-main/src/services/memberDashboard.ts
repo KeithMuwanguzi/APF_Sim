@@ -85,7 +85,7 @@ function handleApiError(error: unknown): never {
 export async function fetchMemberDashboard(): Promise<MemberDashboardResponse> {
   try {
     const response = await axios.get<MemberDashboardResponse>(
-      `${API_BASE_URL}/api/v1/member/dashboard/`,
+      `${API_BASE_URL}/api/v1/applications/member-dashboard/`,
       {
         headers: getAuthHeaders(),
         timeout: 30000,
