@@ -14,7 +14,16 @@ from Documents.models import Document
 from .serializers import ApplicationSerializer, ApplicationListSerializer
 from . import services
 from notifications.serializers import NotificationSerializer
-from authentication.permissions import AllowPublicApplicationSubmission
+from authentication.permissions import AllowPublicApplicationSubmission, IsAuthenticated, IsAdmin, IsMember
+from dashboard.services import (
+    get_application_statistics,
+    get_recent_payments,
+    get_member_dashboard_data,
+)
+from dashboard.serializers import (
+    ApplicationStatisticsSerializer,
+    MemberDashboardSerializer,
+)
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 import logging
@@ -61,13 +70,7 @@ class ApplicationViewSet(viewsets.ModelViewSet):
         if self.action == 'create':
             # Allow anyone to create applications (public submission)
             permission_classes = [AllowPublicApplicationSubmission]
-        elif self.action == 'recent' or self.action == 'list':
-            # Allow admin users to access recent and full application lists
-            from authentication.permissions import IsAuthenticated, IsAdmin
-            permission_classes = [IsAuthenticated, IsAdmin]
         else:
-            # All other actions (retrieve, update, partial_update, destroy, custom actions) require admin authentication
-            from authentication.permissions import IsAuthenticated, IsAdmin
             permission_classes = [IsAuthenticated, IsAdmin]
         
         return [permission() for permission in permission_classes]
@@ -92,8 +95,9 @@ class ApplicationViewSet(viewsets.ModelViewSet):
                 'status', 'payment_status', 'submitted_at', 'updated_at'
             ).order_by('-submitted_at')
         return Application.objects.all().order_by('-submitted_at')
+
     @swagger_auto_schema(
-        tags=["applications"],
+        tags=["Applications"],
         operation_description="List all applications with pagination. Admins see all applications, members see only their own.",
         manual_parameters=[
             openapi.Parameter(
@@ -161,7 +165,7 @@ class ApplicationViewSet(viewsets.ModelViewSet):
 
 
     @swagger_auto_schema(
-        tags=["applications"],
+        tags=["Applications"],
         operation_description="Retrieve a single application by ID with all details including documents",
         responses={
             200: openapi.Response(
@@ -212,9 +216,6 @@ class ApplicationViewSet(viewsets.ModelViewSet):
             logger.error(f"Error retrieving application: {str(e)}", exc_info=True)
             raise
 
-
-
-   
     def create(self, request, *args, **kwargs):
         """
         Create a new membership application (public endpoint)
@@ -772,3 +773,60 @@ class ApplicationViewSet(viewsets.ModelViewSet):
             'cancelled': 'Payment was cancelled.'
         }
         return messages.get(status, 'Unknown payment status')
+
+    # ── Dashboard endpoints (consolidated from dashboard app) ──
+
+    @swagger_auto_schema(
+        method='get',
+        operation_description="Get comprehensive application statistics including totals, status breakdown, revenue, and trends",
+        responses={
+            200: openapi.Response(
+                description="Application statistics with trends",
+                schema=ApplicationStatisticsSerializer,
+            )
+        },
+        tags=['Applications'],
+    )
+    @action(detail=False, methods=['get'], url_path='statistics', permission_classes=[IsAuthenticated, IsAdmin])
+    def statistics(self, request):
+        """GET /api/v1/applications/statistics/ — dashboard stats derived from applications."""
+        data = get_application_statistics()
+        serializer = ApplicationStatisticsSerializer(data)
+        return Response(serializer.data)
+
+    @swagger_auto_schema(
+        method='get',
+        operation_description="Get recent successful payments for dashboard display",
+        manual_parameters=[
+            openapi.Parameter('limit', openapi.IN_QUERY, description="Number of recent payments to return (default: 5)", type=openapi.TYPE_INTEGER, default=5),
+        ],
+        responses={
+            200: openapi.Response(description="List of recent payments")
+        },
+        tags=['Applications'],
+    )
+    @action(detail=False, methods=['get'], url_path='recent-payments', permission_classes=[IsAuthenticated, IsAdmin])
+    def recent_payments(self, request):
+        """GET /api/v1/applications/recent-payments/ — recent payments derived from applications."""
+        limit = int(request.query_params.get('limit', 5))
+        payments = get_recent_payments(limit)
+        return Response(payments)
+
+    @swagger_auto_schema(
+        method='get',
+        operation_description="Get comprehensive dashboard data for authenticated member including profile, documents, activity, and notifications",
+        responses={
+            200: openapi.Response(
+                description="Member dashboard data",
+                schema=MemberDashboardSerializer,
+            ),
+            401: "Authentication required"
+        },
+        tags=['Applications'],
+    )
+    @action(detail=False, methods=['get'], url_path='member-dashboard', permission_classes=[IsAuthenticated, IsMember])
+    def member_dashboard(self, request):
+        """GET /api/v1/applications/member-dashboard/ — member dashboard data."""
+        data = get_member_dashboard_data(request.user, request=request)
+        serializer = MemberDashboardSerializer(data)
+        return Response(serializer.data)

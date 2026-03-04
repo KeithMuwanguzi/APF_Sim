@@ -35,7 +35,6 @@ def health_check(request):
             'contacts': '/api/v1/contacts/',
             'applications': '/api/v1/applications/',
             'payments': '/api/v1/payments/',
-            'dashboard': '/api/v1/',
             'docs': '/api/docs/'
         }
     })
@@ -128,8 +127,6 @@ api_v1_patterns = [
     path("notifications/", include("notifications.urls")),
     path("notifications/", include("AdminNotifications.urls")),
     path("admin-management/", include("admin_management.urls")),
-    path("", include("profiles.urls")),
-    path("", include("dashboard.urls")),
 ]
 
 # Swagger/OpenAPI Schema - configured to scan only v1 patterns
@@ -179,8 +176,6 @@ urlpatterns = [
     path("api/v1/notifications/", include("notifications.urls")),  # User notifications endpoints
     path("api/v1/notifications/", include("AdminNotifications.urls")),  # Admin announcements endpoints
     path("api/v1/admin-management/", include("admin_management.urls")),
-    path("api/v1/", include("profiles.urls")),
-    path("api/v1/", include("dashboard.urls")),
     
     # Secure media files serving
     path("media/<path:path>", secure_media_serve, name="secure-media"),

@@ -173,13 +173,12 @@ class TokenService:
     """Service for handling JWT token generation and refresh"""
     
     @staticmethod
-    def generate_tokens(user, remember_me=False):
+    def generate_tokens(user):
         """
         Generate JWT access and refresh tokens for user
         
         Args:
             user: User object
-            remember_me: Boolean flag for extended refresh token lifetime
             
         Returns:
             Dictionary with access_token, refresh_token, and user info
@@ -190,11 +189,8 @@ class TokenService:
         refresh['email'] = user.email
         refresh['role'] = user.role
         
-        # Set refresh token expiration based on remember_me
-        if remember_me:
-            refresh.set_exp(lifetime=timedelta(days=30))
-        else:
-            refresh.set_exp(lifetime=timedelta(days=1))
+        # Fixed 1-day refresh token lifetime
+        refresh.set_exp(lifetime=timedelta(days=1))
         
         return {
             'access_token': str(refresh.access_token),
