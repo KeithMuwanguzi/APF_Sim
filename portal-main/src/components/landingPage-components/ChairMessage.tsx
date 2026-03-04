@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useScrollAnimation } from '../../hooks/useScrollAnimation'
 import defaultChairmanImg from '../../assets/images/landingPage-image/chair.jpg'
+import { CMS_BASE_URL } from '../../config/api';
 
 interface ChairMessageProps {
   data?: {
@@ -19,7 +20,7 @@ function ChairMessage({ data }: ChairMessageProps) {
 
   // Handle dynamic photo from Strapi
   const photoUrl = data?.photo?.url 
-    ? `http://localhost:1337${data.photo.url}` 
+    ? `${CMS_BASE_URL}${data.photo.url}` 
     : defaultChairmanImg;
 
   return (

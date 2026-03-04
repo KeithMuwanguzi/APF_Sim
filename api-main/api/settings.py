@@ -95,7 +95,7 @@ ROOT_URLCONF = "api.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],  # Add project-level templates directory
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -178,17 +178,17 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Africa/Kampala"  # Uganda timezone (EAT - UTC+3)
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = True  # Keep timezone-aware datetimes (recommended)
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
@@ -205,27 +205,15 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = 'authentication.User'
 
 # CORS Settings
-# CORS_ALLOWED_ORIGINS = env.list(
-
-#     # "CORS_ALLOWED_ORIGINS",
-#     # default=[
-#     #     "http://localhost:5173",
-#     #     "http://localhost:3000",
-#     #     "http://localhost:3001",
-#     #     "http://localhost:3002",  # Add the current frontend port
-#     #     "http://127.0.0.1:5173",
-#     #     "http://127.0.0.1:3000",
-#     #     "http://127.0.0.1:3001",
-#     #     "http://127.0.0.1:3002",  # Add the current frontend port
-#     # ]
-# )
-
-
 CORS_ALLOWED_ORIGINS = env.list(
     "CORS_ALLOWED_ORIGINS",
     default=[
-        "http://localhost",
         "http://localhost:3000",
+        "http://localhost:5173",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:5173",
+        "https://apf-uganda.onrender.com",
+        "http://64.225.121.230:8000",
     ]
 )
 
@@ -328,19 +316,15 @@ CACHES = {
 RATE_LIMIT_ATTEMPTS = 5
 RATE_LIMIT_WINDOW = 900  # 15 minutes in seconds
 
-# EmailJS Configuration (Requires private key for server-side calls)
-EMAILJS_SERVICE_ID = env('EMAILJS_SERVICE_ID', default='')
-EMAILJS_TEMPLATE_ID_OTP = env('EMAILJS_TEMPLATE_ID_OTP', default='')
-# Note: Password reset now uses the same template as OTP to save on template limits
-EMAILJS_TEMPLATE_ID_APPROVAL = env('EMAILJS_TEMPLATE_ID_APPROVAL', default='')
-EMAILJS_PUBLIC_KEY = env('EMAILJS_PUBLIC_KEY', default='')
-EMAILJS_PRIVATE_KEY = env('EMAILJS_PRIVATE_KEY', default='')
-EMAILJS_API_URL = 'https://api.emailjs.com/api/v1.0/email/send'
+# SMTP Email Configuration
+# Configured via environment variables:
+# EMAIL_BACKEND, EMAIL_HOST, EMAIL_PORT, EMAIL_USE_TLS
+# EMAIL_HOST_USER, EMAIL_HOST_PASSWORD, DEFAULT_FROM_EMAIL
 
 # Frontend URL Configuration
 FRONTEND_URL = env('FRONTEND_URL', default='http://localhost:5173')
 
-# Email Configuration (for SMTP - recommended for production)
+# Email Configuration (for SMTP )
 # For development, use console backend to print emails to terminal
 EMAIL_BACKEND = env('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
 EMAIL_HOST = env('EMAIL_HOST', default='smtp.gmail.com')

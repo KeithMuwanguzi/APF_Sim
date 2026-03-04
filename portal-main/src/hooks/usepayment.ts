@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Payment, DashboardStats } from '../components/payment-components/types'; 
+import { API_BASE_URL } from '../config/api';
 
 export const usePayments = () => {
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -20,7 +21,7 @@ export const usePayments = () => {
   const fetchPayments = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:8000/api/payments/dashboard/');
+      const response = await fetch(`${API_BASE_URL}/api/payments/dashboard/`);
       if (!response.ok) throw new Error('Failed to fetch payment data');
       
       const data = await response.json();

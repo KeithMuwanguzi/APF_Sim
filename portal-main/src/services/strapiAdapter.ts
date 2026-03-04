@@ -2,6 +2,7 @@
  * Strapi Response Adapter
  * Transforms Strapi's nested response structure to flat objects expected by frontend
  */
+import { CMS_BASE_URL } from '../config/api';
 
 // Generic Strapi response types
 interface StrapiMedia {
@@ -49,7 +50,7 @@ interface StrapiSingleResponse<T> {
 /**
  * Extract media URL from Strapi media object
  */
-export const extractMediaUrl = (media: StrapiMedia | undefined, baseUrl: string = 'http://localhost:1337'): string => {
+export const extractMediaUrl = (media: StrapiMedia | undefined, baseUrl: string = CMS_BASE_URL): string => {
   if (!media?.data?.attributes?.url) return '';
   const url = media.data.attributes.url;
   // If URL is relative, prepend base URL

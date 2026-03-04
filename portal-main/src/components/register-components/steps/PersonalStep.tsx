@@ -58,9 +58,14 @@ function PersonalStep({ data, onChange, onValidationChange }: PersonalInfoStepPr
       newErrors.address = 'Address is required';
     }
 
-    // Validate National ID Number (required)
+    // Validate National ID Number (required, must start with CF or CM and be 13 characters - alphanumeric)
     if (!data.nationalIdNumber || data.nationalIdNumber.trim() === '') {
       newErrors.nationalIdNumber = 'National ID Number is required';
+    } else {
+      const nationalIdPattern = /^(CF|CM)[A-Z0-9]{11}$/i;
+      if (!nationalIdPattern.test(data.nationalIdNumber.trim())) {
+        newErrors.nationalIdNumber = 'National ID must start with CF or CM and be exactly 13 characters (letters and numbers, e.g., CF12345ABC67)';
+      }
     }
 
     // Validate ICPAU Certificate Number (required)
@@ -187,10 +192,10 @@ function PersonalStep({ data, onChange, onValidationChange }: PersonalInfoStepPr
         <Input
           label="National ID Number (NIN)"
           type="text"
-          placeholder="CMXXXXXXXXXX"
+          placeholder="CF12345ABC67 or CM1234567890A"
           name="nationalIdNumber"
           value={data.nationalIdNumber}
-          onChange={(e) => handleFieldChange('nationalIdNumber', e.target.value)}
+          onChange={(e) => handleFieldChange('nationalIdNumber', e.target.value.toUpperCase())}
           onBlur={() => handleBlur('nationalIdNumber')}
           error={getFieldError('nationalIdNumber')}
           required

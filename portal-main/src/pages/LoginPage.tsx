@@ -62,21 +62,8 @@ function LoginPage() {
         sessionStorage.setItem('remember_me', rememberMe.toString())
         sessionStorage.setItem('login_email', email)
 
-        // Send OTP email via EmailJS (frontend)
-        if (data.otp_code) {
-          try {
-            const { sendOTPEmail } = await import('../services/emailService')  
-            await sendOTPEmail({
-              to_email: data.email,
-              otp_code: data.otp_code,
-              user_name: data.user_name
-            })
-            console.log('OTP email sent via EmailJS')
-          } catch (emailError) {
-            console.error('⚠ Failed to send OTP email:', emailError)
-            // Continue anyway - user can still see OTP in console
-          }
-        }
+        // OTP email is sent by backend automatically
+        console.log('OTP email sent by backend to:', data.email)
 
         // Navigate to OTP page
         navigate('/otp')

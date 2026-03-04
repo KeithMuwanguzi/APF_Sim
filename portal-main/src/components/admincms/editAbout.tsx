@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import api from '../../utils/cmsapi';
 import { Save, Plus, Trash2, ArrowLeft, Image as ImageIcon, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { CMS_BASE_URL } from '../../config/api';
 
 const AboutPageEditor = () => {
   const navigate = useNavigate();
@@ -151,7 +152,7 @@ const AboutPageEditor = () => {
               <div className="relative group aspect-video md:aspect-square bg-slate-100 rounded-2xl overflow-hidden border-2 border-dashed border-slate-200 flex items-center justify-center">
                 {data.hero.backgroundImage?.url ? (
                   <img 
-                    src={`http://localhost:1337${data.hero.backgroundImage.url}`} 
+                    src={`${CMS_BASE_URL}${data.hero.backgroundImage.url}`} 
                     className="w-full h-full object-cover" 
                   />
                 ) : (

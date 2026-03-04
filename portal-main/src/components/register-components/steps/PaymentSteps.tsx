@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import PaymentOption from "./PaymentOption";
 import { PaymentForms } from "../PaymentForms";
 import mtnLogo from "../../../assets/images/registerPage-images/mtn.png";
@@ -60,19 +60,19 @@ function PaymentsStep({ data, onChange, onValidationChange, onPaymentComplete }:
   };
 
   // Handle payment data change from PaymentForms
-  const handlePaymentDataChange = (data: PaymentData) => {
+  const handlePaymentDataChange = useCallback((data: PaymentData) => {
     setPaymentData(data);
     if (onChange) {
       onChange(data);
     }
-  };
+  }, [onChange]);
 
   // Handle payment validation result from PaymentForms
-  const handlePaymentValidated = (isValid: boolean) => {
+  const handlePaymentValidated = useCallback((isValid: boolean) => {
     setIsPaymentValid(isValid);
     // Note: Payment data is already updated by handlePaymentDataChange
     // No need to update it again here to avoid overwriting the status
-  };
+  }, []);
 
   return (
     <div className="space-y-6">

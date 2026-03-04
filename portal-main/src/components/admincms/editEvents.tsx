@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../../utils/cmsapi';
 import { EventForm } from '../../components/cms-components/eventForm';
+import { CMS_BASE_URL } from '../../config/api';
 import { Plus, Calendar, MapPin, Trash2, Edit3, AlertCircle } from 'lucide-react';
 
 const EventsManager = () => {
@@ -115,7 +116,7 @@ const EventsManager = () => {
                 <div className="h-44 bg-slate-100 relative overflow-hidden">
                   {imageUrl ? (
                     <img 
-                      src={`http://localhost:1337${imageUrl}`} 
+                      src={`${CMS_BASE_URL}${imageUrl}`} 
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       alt={item.title}
                     />

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import api from '../../utils/cmsapi';
+import { CMS_BASE_URL } from '../../config/api';
 import { 
   MapPin, Video, Image as ImageIcon, 
   Clock, Save, ArrowLeft, Layers, Bookmark
@@ -170,7 +171,7 @@ export const EventForm = ({ initialData, onSave, onCancel }: any) => {
              <label className="text-[10px] font-black uppercase text-slate-400 mb-3 block tracking-widest">Event Banner</label>
              <div className="relative h-40 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center group overflow-hidden">
                 {formData.image?.url ? (
-                  <img src={`http://localhost:1337${formData.image.url}`} className="w-full h-full object-cover" />
+                  <img src={`${CMS_BASE_URL}${formData.image.url}`} className="w-full h-full object-cover" />
                 ) : (
                   <>
                     <ImageIcon className="text-slate-300" size={32} />

@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useScrollAnimation } from '../../hooks/useScrollAnimation'
+import { CMS_BASE_URL } from '../../config/api';
 
 interface PartnerItem {
   name?: string;
@@ -29,7 +30,7 @@ function Partners({ data }: { data?: PartnerItem[] }) {
 
     if (!path) return '';
     if (path.startsWith('http')) return path;
-    if (path.startsWith('/')) return `http://localhost:1337${path}`;
+    if (path.startsWith('/')) return `${CMS_BASE_URL}${path}`;
     
     return path;
   };

@@ -10,7 +10,6 @@ import { useAdminActions } from "../../hooks/useAdminActions";
 import { useDashboardStats } from "../../hooks/useDashboardStats";
 import { requireAdmin } from "../../utils/auth";
 import { AuthDebug } from "../../components/debug/AuthDebug";
-import { sendApprovalEmail } from "../../services/emailService";
 
 import {
     MdPendingActions,
@@ -81,25 +80,11 @@ const AdminApprovals = () => {
             const result = await approve(applicationId);
             if (result.success) {
                 setSuccessMessage("Application approved successfully");
-
-               
+                
+                // Approval email is sent by backend automatically
                 const application = applications.find(app => app.id === applicationId);
                 if (application) {
-                    try {
-                        const emailSent = await sendApprovalEmail({
-                            to_email: application.email,
-                            user_name: application.name,
-                            from_email: 'abnowellah@gmail.com'
-                        });
-
-                        if (emailSent) {
-                            console.log('Approval email sent to:', application.email);
-                        } else {
-                            console.warn('Failed to send approval email');
-                        }
-                    } catch (emailError) {
-                        console.error(' Error sending approval email:', emailError);
-                    }
+                    console.log('Approval email sent by backend to:', application.email);
                 }
             }
 

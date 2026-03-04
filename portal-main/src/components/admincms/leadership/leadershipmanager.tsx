@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../../../utils/cmsapi';
+import { CMS_BASE_URL } from '../../../config/api';
 import { Plus, Pencil, Trash2, UserPlus, CheckCircle, XCircle } from 'lucide-react';
 
 const LeadershipManager = () => {
@@ -87,7 +88,7 @@ const LeadershipManager = () => {
             <div className="flex items-center gap-4">
               {leader.attributes.Photo?.data?.attributes?.url && (
                 <img 
-                  src={`http://localhost:1337${leader.attributes.Photo.data.attributes.url}`} 
+                  src={`${CMS_BASE_URL}${leader.attributes.Photo.data.attributes.url}`} 
                   className="w-16 h-16 rounded-full object-cover"
                 />
               )}

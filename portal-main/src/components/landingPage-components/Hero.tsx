@@ -1,12 +1,13 @@
 import { useNavigate } from 'react-router-dom';
 import defaultHeroImg from '../../assets/images/landingPage-image/land.jpg';
+import { CMS_BASE_URL } from '../../config/api';
 
 function Hero({ data }: { data?: any }) {
   const navigate = useNavigate();
 
  
   const bgUrl = data?.backgroundImage?.url 
-    ? `http://localhost:1337${data.backgroundImage.url}` 
+    ? `${CMS_BASE_URL}${data.backgroundImage.url}` 
     : defaultHeroImg;
 
   return (

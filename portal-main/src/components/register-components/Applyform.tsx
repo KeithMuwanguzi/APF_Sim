@@ -97,10 +97,6 @@ function ApplyForm() {
 
     // Validate payment is successful - check both status and isValidated flag
     if ((paymentData.status !== 'success' && paymentData.status !== 'completed') || !paymentData.isValidated) {
-      console.log('[Applyform] Validation failed: payment not completed', {
-        status: paymentData.status,
-        isValidated: paymentData.isValidated
-      });
       setSubmissionError('Please complete payment before submitting');
       return;
     }

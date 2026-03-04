@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save, Loader2, Layout, Quote, BarChart3, Building2, Plus, Trash2, Upload } from 'lucide-react';
 import * as cms from '../../services/cmsApi';
+import { CMS_BASE_URL } from '../../config/api';
 
 const HomepageEditor = () => {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ const HomepageEditor = () => {
     if (!media) return null;
     const url = media.data?.attributes?.url || media.attributes?.url || media.url;
     if (!url) return null;
-    return url.startsWith('http') ? url : `http://localhost:1337${url}`;
+    return url.startsWith('http') ? url : `${CMS_BASE_URL}${url}`;
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, callback: (fileObject: any) => void) => {
@@ -39,7 +40,7 @@ const HomepageEditor = () => {
     formData.append('files', file);
     setSaving(true);
     try {
-      const response = await fetch('http://localhost:1337/api/upload', {
+      const response = await fetch(`${CMS_BASE_URL}/api/upload`, {
         method: 'POST',
         body: formData,
       });

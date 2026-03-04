@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { API_BASE_URL } from '../config/api';
 
 const ResetPasswordPage: React.FC = () => {
   const navigate = useNavigate();
@@ -32,7 +33,7 @@ const ResetPasswordPage: React.FC = () => {
     setResending(true);
 
     try {
-      const response = await fetch('http://localhost:8000/api/v1/auth/resend-password-reset-otp/', {
+      const response = await fetch(`${API_BASE_URL}/api/v1/auth/resend-password-reset-otp/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -79,7 +80,7 @@ const ResetPasswordPage: React.FC = () => {
 
     try {
       // Verify OTP and reset password
-      const response = await fetch('http://localhost:8000/api/v1/auth/reset-password/', {
+      const response = await fetch(`${API_BASE_URL}/api/v1/auth/reset-password/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

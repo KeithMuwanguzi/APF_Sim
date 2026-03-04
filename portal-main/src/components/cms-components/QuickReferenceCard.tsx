@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { BookOpen, X, ExternalLink, CheckCircle } from 'lucide-react';
+import { CMS_BASE_URL } from '../../config/api';
 
 export const QuickReferenceCard = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -51,12 +52,12 @@ export const QuickReferenceCard = () => {
               <div>
                 <p className="font-semibold text-slate-700">2. Access Admin</p>
                 <a
-                  href="http://localhost:1337/admin"
+                  href={`${CMS_BASE_URL}/admin`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-[#5C32A3] hover:underline flex items-center gap-1"
                 >
-                  http://localhost:1337/admin <ExternalLink size={12} />
+                  {`${CMS_BASE_URL}/admin`} <ExternalLink size={12} />
                 </a>
               </div>
               <div>
