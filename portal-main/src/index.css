@@ -13,6 +13,47 @@
   .animate-gradient-shift {
     animation: gradientShift 8s ease infinite;
   }
+
+  /* Text wrapping utilities */
+  .text-wrap {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    hyphens: auto;
+  }
+
+  .text-ellipsis-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .text-ellipsis-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Prevent horizontal overflow */
+  .no-overflow {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* For long URLs or code */
+  .break-all {
+    word-break: break-all;
+  }
+
+  /* Preserve spaces but wrap */
+  .whitespace-normal {
+    white-space: normal;
+  }
 }
 
 @layer base {
@@ -28,6 +69,14 @@
 
   * {
     box-sizing: border-box;
+  }
+
+  /* Global text wrapping to prevent horizontal overflow */
+  p, span, div, h1, h2, h3, h4, h5, h6, a, li, td, th, label {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    hyphens: auto;
   }
 }
 

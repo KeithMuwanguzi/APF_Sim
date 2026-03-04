@@ -236,8 +236,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           </div>
         </header>
 
-        {/* Page Content - Mobile responsive padding */}
-        <main className="flex-1 p-4 md:p-6 bg-gray-50">
+        {/* Page Content - Mobile responsive padding with proper overflow */}
+        <main className="flex-1 p-4 md:p-6 bg-gray-50 overflow-y-auto">
           {children}
         </main>
 

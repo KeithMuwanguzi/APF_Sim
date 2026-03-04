@@ -279,9 +279,11 @@ export const updateForumPost = async (_postId: number, _postData: any): Promise<
 
 export const getForumComments = async (_postId: number): Promise<ApiComment[]> => {
   try {
+    console.log('Fetching comments for post:', _postId);
     const response = await api.get<ApiComment[]>('/api/v1/forum/comments/', {
       params: { post: _postId, parent_only: 'true' }
     })
+    console.log('Comments API response:', response.data);
     return response.data
   } catch (error) {
     console.error('Failed to fetch comments:', error)

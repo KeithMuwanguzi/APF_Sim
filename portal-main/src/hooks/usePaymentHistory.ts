@@ -23,11 +23,13 @@ export const usePaymentHistory = () => {
           getReceipts()
         ])
         
-        setTransactions(transactionsData)
-        setReceipts(receiptsData)
+        setTransactions(transactionsData || [])
+        setReceipts(receiptsData || [])
       } catch (err) {
         setError('Failed to load payment history')
         console.error('Payment history error:', err)
+        setTransactions([])
+        setReceipts([])
       } finally {
         setLoading(false)
       }
@@ -59,10 +61,11 @@ export const useRecentTransactions = (limit: number = 3) => {
       setError(null)
       
       const data = await getRecentTransactions(limit)
-      setTransactions(data)
+      setTransactions(data || [])
     } catch (err) {
       setError('Failed to load recent transactions')
       console.error('Recent transactions error:', err)
+      setTransactions([])
     } finally {
       setLoading(false)
     }
@@ -96,10 +99,11 @@ export const useReceipts = () => {
         setError(null)
         
         const data = await getReceipts()
-        setReceipts(data)
+        setReceipts(data || [])
       } catch (err) {
         setError('Failed to load receipts')
         console.error('Receipts error:', err)
+        setReceipts([])
       } finally {
         setLoading(false)
       }

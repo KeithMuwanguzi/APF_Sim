@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import {
   CreditCard,
@@ -32,13 +32,63 @@ const PaymentsPage: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedProvider, setSelectedProvider] = useState<PaymentProvider>('mtn')
-  const [paymentAmount] = useState(150000)
+  const [paymentAmount, setPaymentAmount] = useState<number | null>(null)
+  const [loadingFee, setLoadingFee] = useState(true)
 
   // Get recent transactions from payment history (shared data source)
-  const { transactions: recentTransactions, loading: transactionsLoading, refetch: refetchTransactions } = useRecentTransactions(3)
+  const recentTransactionsResult = useRecentTransactions(3)
+  const recentTransactions = recentTransactionsResult?.transactions || []
+  const transactionsLoading = recentTransactionsResult?.loading || false
+  const refetchTransactions = recentTransactionsResult?.refetch || (() => {})
 
   // Get receipts from backend
-  const { receipts, loading: receiptsLoading } = useReceipts()
+  const receiptsResult = useReceipts()
+  const receipts = receiptsResult?.receipts || []
+  const receiptsLoading = receiptsResult?.loading || false
+
+  // Fetch membership fee from API
+  useEffect(() => {
+    const fetchMembershipFee = async () => {
+      try {
+        setLoadingFee(true)
+        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+        const response = await fetch(`${API_BASE_URL}/api/v1/payments/membership-fee/`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          setPaymentAmount(Number(data.amount))
+        } else {
+          console.error('Failed to fetch membership fee')
+          // Fallback to default amount
+          setPaymentAmount(50000)
+        }
+      } catch (error) {
+        console.error('Error fetching membership fee:', error)
+        // Fallback to default amount
+        setPaymentAmount(50000)
+      } finally {
+        setLoadingFee(false)
+      }
+    }
+
+    fetchMembershipFee()
+  }, [])
+
+  // Show loading state while initial data is being fetched
+  if (!recentTransactionsResult || !receiptsResult || loadingFee || paymentAmount === null) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-screen">
+          <Loader2 className="w-8 h-8 text-purple-600 animate-spin" />
+        </div>
+      </DashboardLayout>
+    )
+  }
 
   const paymentMethods = [
     {
@@ -142,6 +192,11 @@ const PaymentsPage: React.FC = () => {
   }
 
   const handleDownloadAllReceipts = async () => {
+    if (!receipts || receipts.length === 0) {
+      showNotification('No receipts available to download', 'error')
+      return
+    }
+    
     try {
       showNotification('Generating receipts summary PDF...', 'success')
       
@@ -163,8 +218,6 @@ const PaymentsPage: React.FC = () => {
       showNotification('Failed to download receipts summary', 'error')
     }
   }
-
-
 
   return (
     <DashboardLayout>
@@ -190,97 +243,92 @@ const PaymentsPage: React.FC = () => {
                 <CreditCard className="w-6 h-6 text-purple-600" />
               </div>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-2">Select Payment Method</h3>
-                <p className="text-gray-600 text-sm mb-4">Choose your preferred payment method for transactions</p>
-                
-                <div className="space-y-3">
-                  {paymentMethods.map((method) => {
-                    const Icon = method.icon
-                    const isSelected = selectedPaymentMethod === method.id
-                    const isDisabled = method.disabled
-                    
-                    return (
-                      <div
-                        key={method.id}
-                        onClick={() => !isDisabled && handlePaymentMethodSelect(method.id)}
-                        className={`border-2 rounded-lg p-4 transition-all flex items-center gap-4 ${
-                          isDisabled 
-                            ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-60' 
-                            : isSelected 
-                              ? 'border-purple-600 bg-purple-50 cursor-pointer' 
-                              : 'border-gray-200 hover:border-purple-200 hover:bg-purple-50/30 cursor-pointer'
-                        }`}
-                      >
-                        <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-                          isDisabled ? 'bg-gray-200' : 'bg-purple-100'
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                {paymentMethods.map((method) => {
+                  const Icon = method.icon
+                  const isSelected = selectedPaymentMethod === method.id
+                  
+                  return (
+                    <button
+                      key={method.id}
+                      onClick={() => !method.disabled && handlePaymentMethodSelect(method.id)}
+                      disabled={method.disabled}
+                      className={`w-full p-4 rounded-lg border-2 transition-all ${
+                        isSelected
+                          ? 'border-purple-600 bg-purple-50'
+                          : method.disabled
+                          ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-60'
+                          : 'border-gray-300 hover:border-purple-400 hover:bg-purple-50/50'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                          isSelected ? 'bg-purple-600' : method.disabled ? 'bg-gray-300' : 'bg-gray-200'
                         }`}>
-                          <Icon className={`w-6 h-6 ${isDisabled ? 'text-gray-400' : 'text-purple-600'}`} />
+                          <Icon className={`w-5 h-5 ${isSelected ? 'text-white' : 'text-gray-600'}`} />
                         </div>
-                        <div className="flex-1">
-                          <div className={`font-semibold ${isDisabled ? 'text-gray-400' : 'text-gray-900'}`}>
-                            {method.name}
-                            {isDisabled && (
-                              <span className="ml-2 text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-full">
-                                Unavailable
-                              </span>
+                        <div className="flex-1 text-left">
+                          <div className="flex items-center gap-2">
+                            <p className="font-semibold text-gray-900">{method.name}</p>
+                            {method.disabled && (
+                              <Lock className="w-4 h-4 text-gray-400" />
                             )}
                           </div>
-                          <div className={`text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-600'}`}>
-                            {method.description}
-                          </div>
+                          <p className="text-sm text-gray-600">{method.description}</p>
                         </div>
-                        {isSelected && !isDisabled && (
+                        {isSelected && (
                           <CheckCircle className="w-5 h-5 text-purple-600" />
                         )}
                       </div>
-                    )
-                  })}
+                    </button>
+                  )
+                })}
+              </div>
+
+              <div className="pt-4 border-t border-gray-200">
+                <div className="flex justify-between items-center mb-4">
+                  <span className="text-gray-600">Amount to Pay</span>
+                  <span className="text-2xl font-bold text-purple-600">
+                    UGX {paymentAmount.toLocaleString()}
+                  </span>
                 </div>
+                <Button
+                  onClick={handleProceedPayment}
+                  disabled={isProcessing || !selectedPaymentMethod}
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isProcessing ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <CreditCard className="w-5 h-5" />
+                      Proceed to Payment
+                    </>
+                  )}
+                </Button>
               </div>
-
-              <div className="bg-purple-50 border-l-4 border-purple-600 p-4 rounded">
-                <p className="text-sm text-gray-700">
-                  <strong className="text-purple-700">Secure payment powered by APF Pay.</strong> All transactions are encrypted with bank-level security.
-                </p>
-              </div>
-
-              <div className="bg-purple-50 border-l-4 border-purple-600 p-4 rounded">
-                <p className="text-sm text-gray-700">
-                  <strong className="text-purple-700">Important Notice:</strong> Please review your selected payment purpose and method before proceeding to ensure accurate transaction processing.
-                </p>
-              </div>
-
-              <Button 
-                onClick={handleProceedPayment}
-                disabled={isProcessing}
-                className="w-full bg-purple-600 hover:bg-purple-700 flex items-center gap-2"
-              >
-                {isProcessing ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <Lock className="w-4 h-4" />
-                    Proceed to Secure Payment
-                  </>
-                )}
-              </Button>
             </CardContent>
           </Card>
 
           {/* Payment History Card */}
           <Card className="bg-white shadow-lg border border-gray-200 h-fit">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-              <CardTitle className="text-lg font-semibold text-gray-800">Recent Transactions</CardTitle>
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <History className="w-6 h-6 text-blue-600" />
-              </div>
+              <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                <History className="w-5 h-5 text-purple-600" />
+                Recent Transactions
+              </CardTitle>
+              <Link to="/payment-history">
+                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                  <ExternalLink className="w-4 h-4" />
+                  View All
+                </Button>
+              </Link>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent>
               {transactionsLoading ? (
                 <div className="flex items-center justify-center py-8">
                   <Loader2 className="w-6 h-6 text-purple-600 animate-spin" />
@@ -293,59 +341,58 @@ const PaymentsPage: React.FC = () => {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {recentTransactions.map((transaction, index) => {
-                    const MethodIcon = transaction.methodIcon
-                    return (
-                      <div key={index} className="border border-gray-200 rounded-lg p-4 hover:border-purple-200 hover:bg-purple-50/30 transition-all">
-                        <div className="flex justify-between items-start mb-2">
-                          <div className="flex-1">
-                            <div className="font-semibold text-gray-900">{transaction.date}</div>
-                            <Badge className="bg-purple-100 text-purple-700 text-xs mt-1">
-                              {transaction.type}
-                            </Badge>
-                          </div>
-                          <div className="text-right">
-                            <div className="font-semibold text-gray-900">{transaction.amount}</div>
-                            <div className="text-sm text-gray-600">{transaction.reference}</div>
-                          </div>
+                  {recentTransactions.map((transaction, index) => (
+                    <div
+                      key={index}
+                      className="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <p className="font-semibold text-gray-900 text-sm">{transaction.type}</p>
+                          <p className="text-xs text-gray-500">{transaction.date}</p>
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center">
-                            {MethodIcon ? (
-                              <MethodIcon className="w-3 h-3 text-purple-600" />
-                            ) : (
-                              <FileText className="w-3 h-3 text-purple-600" />
-                            )}
-                          </div>
-                          {transaction.method}
-                        </div>
+                        <Badge className={`text-xs ${
+                          transaction.status.toLowerCase() === 'completed'
+                            ? 'bg-green-100 text-green-700'
+                            : transaction.status.toLowerCase() === 'pending'
+                            ? 'bg-yellow-100 text-yellow-700'
+                            : 'bg-red-100 text-red-700'
+                        }`}>
+                          {transaction.status}
+                        </Badge>
                       </div>
-                    )
-                  })}
+                      <div className="flex justify-between items-center">
+                        <p className="text-xs text-gray-600">{transaction.reference}</p>
+                        <p className="font-semibold text-gray-900 text-sm">{transaction.amount}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
-              
-              <Link to="/payment-history">
-                <Button variant="outline" className="w-full flex items-center gap-2">
-                  <ExternalLink className="w-4 h-4" />
-                  View Complete Payment History
-                </Button>
-              </Link>
             </CardContent>
           </Card>
         </div>
 
-        {/* Receipts & Invoices Card - Full Width */}
+        {/* Receipts & Invoices Section */}
         <Card className="bg-white shadow-lg border border-gray-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-            <CardTitle className="text-lg font-semibold text-gray-800">Receipts & Invoices</CardTitle>
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <FileText className="w-6 h-6 text-green-600" />
-            </div>
+            <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+              <FileText className="w-5 h-5 text-purple-600" />
+              Receipts & Invoices
+            </CardTitle>
+            {receipts.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleDownloadAllReceipts}
+                className="flex items-center gap-2"
+              >
+                <FileArchive className="w-4 h-4" />
+                Download All
+              </Button>
+            )}
           </CardHeader>
-          <CardContent className="space-y-6">
-            <p className="text-gray-600">Here you can download your invoices and receipts in PDF format for your records.</p>
-            
+          <CardContent>
             {receiptsLoading ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="w-6 h-6 text-purple-600 animate-spin" />
@@ -354,58 +401,50 @@ const PaymentsPage: React.FC = () => {
               <div className="text-center py-8">
                 <FileText className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                 <p className="text-gray-600 text-sm">No receipts available</p>
-                <p className="text-gray-500 text-xs mt-1">Receipts and invoices will appear here after payments are made</p>
+                <p className="text-gray-500 text-xs mt-1">Receipts will appear here after successful payments</p>
               </div>
             ) : (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {receipts.map((receipt) => (
-                    <div key={receipt.id} className="border border-gray-200 rounded-lg p-4 hover:border-purple-200 hover:bg-purple-50/30 transition-all">
-                      <div className="flex items-start gap-3 mb-4">
-                        <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <FileText className="w-6 h-6 text-purple-600" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-gray-900 text-sm leading-tight mb-1">{receipt.title}</h4>
-                          <p className="text-xs text-gray-600">Issued: {receipt.date}</p>
-                          <p className="text-xs text-gray-600">Amount: {receipt.amount}</p>
-                          <p className="text-xs text-gray-500">Ref: {receipt.reference}</p>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="flex-1 text-xs hover:bg-purple-50 hover:border-purple-300"
-                          onClick={() => handleViewReceipt(receipt)}
-                        >
-                          <Eye className="w-3 h-3 mr-1" />
-                          View
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          className="flex-1 bg-purple-600 hover:bg-purple-700 text-xs"
-                          onClick={() => handleDownloadReceipt(receipt)}
-                        >
-                          <Download className="w-3 h-3 mr-1" />
-                          Download
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="pt-4 border-t border-gray-200">
-                  <Button 
-                    variant="outline" 
-                    className="w-full flex items-center gap-2 hover:bg-purple-50 hover:border-purple-300"
-                    onClick={handleDownloadAllReceipts}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {receipts.map((receipt) => (
+                  <div
+                    key={receipt.id}
+                    className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
                   >
-                    <FileArchive className="w-4 h-4" />
-                    Download All Receipts Summary (PDF)
-                  </Button>
-                </div>
-              </>
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <FileText className="w-5 h-5 text-purple-600" />
+                      </div>
+                      <Badge className="text-xs bg-green-100 text-green-700">
+                        {receipt.type}
+                      </Badge>
+                    </div>
+                    <h4 className="font-semibold text-gray-900 text-sm mb-1">{receipt.title}</h4>
+                    <p className="text-xs text-gray-500 mb-2">{receipt.date}</p>
+                    <p className="text-xs text-gray-600 mb-3">Ref: {receipt.reference}</p>
+                    <p className="font-bold text-purple-600 mb-3">{receipt.amount}</p>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleViewReceipt(receipt)}
+                        className="flex-1 flex items-center justify-center gap-1"
+                      >
+                        <Eye className="w-3 h-3" />
+                        View
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDownloadReceipt(receipt)}
+                        className="flex-1 flex items-center justify-center gap-1"
+                      >
+                        <Download className="w-3 h-3" />
+                        Download
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
           </CardContent>
         </Card>

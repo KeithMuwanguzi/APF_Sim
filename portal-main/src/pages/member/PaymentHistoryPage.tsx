@@ -5,11 +5,11 @@ import {
   Calendar,
   Filter,
   Download,
-  Eye,
   RefreshCw,
   Search,
   ChevronLeft,
   FileText,
+  CreditCard,
 } from "lucide-react"
 
 import { DashboardLayout } from "../../components/layout/DashboardLayout"
@@ -94,11 +94,8 @@ const PaymentHistoryPage: React.FC = () => {
   }
 
   const handleLoadMore = () => {
-    setIsLoading(true)
-    setTimeout(() => {
-      setIsLoading(false)
-      alert('Loading more transactions...')
-    }, 1500)
+    // TODO: Implement pagination with backend API
+    showNotification('All transactions loaded', 'success')
   }
 
   const getStatusColor = (status: string) => {
@@ -116,16 +113,8 @@ const PaymentHistoryPage: React.FC = () => {
 
   const getTypeColor = (type: string) => {
     switch (type.toLowerCase()) {
-      case 'annual subscription':
+      case 'membership fee':
         return 'bg-purple-100 text-purple-700'
-      case 'application fee':
-        return 'bg-blue-100 text-blue-700'
-      case 'donation':
-        return 'bg-green-100 text-green-700'
-      case 'workshop fee':
-        return 'bg-orange-100 text-orange-700'
-      case 'cpd event':
-        return 'bg-indigo-100 text-indigo-700'
       default:
         return 'bg-gray-100 text-gray-700'
     }
@@ -270,11 +259,7 @@ const PaymentHistoryPage: React.FC = () => {
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
                     >
                       <option value="all">All Types</option>
-                      <option value="subscription">Annual Subscription</option>
-                      <option value="application">Application Fee</option>
-                      <option value="donation">Donation</option>
-                      <option value="workshop">Workshop Fee</option>
-                      <option value="cpd">CPD Event</option>
+                      <option value="membership">Membership Fee</option>
                     </select>
                   </div>
                   
@@ -335,7 +320,7 @@ const PaymentHistoryPage: React.FC = () => {
                     </thead>
                     <tbody>
                       {transactions.map((transaction, index) => {
-                        const MethodIcon = transaction.methodIcon
+                        const MethodIcon = transaction.methodIcon || CreditCard
                         return (
                           <tr key={index} className="border-b hover:bg-purple-50/30 transition-colors">
                             <td className="py-4 px-4 text-sm font-medium text-gray-900">
@@ -360,11 +345,7 @@ const PaymentHistoryPage: React.FC = () => {
                             <td className="py-4 px-4">
                               <div className="flex items-center gap-2">
                                 <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center">
-                                  {MethodIcon ? (
-                                    <MethodIcon className="w-3 h-3 text-purple-600" />
-                                  ) : (
-                                    <FileText className="w-3 h-3 text-purple-600" />
-                                  )}
+                                  <MethodIcon className="w-3 h-3 text-purple-600" />
                                 </div>
                                 <span className="text-sm text-gray-600">{transaction.method}</span>
                               </div>
@@ -379,14 +360,8 @@ const PaymentHistoryPage: React.FC = () => {
                                 <Button 
                                   variant="outline" 
                                   size="sm"
-                                  onClick={() => alert(`Viewing details for ${transaction.reference}`)}
-                                >
-                                  <Eye className="w-3 h-3" />
-                                </Button>
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
                                   onClick={() => handleDownloadReceipt(transaction)}
+                                  aria-label="Download Receipt"
                                 >
                                   <Download className="w-3 h-3" />
                                 </Button>

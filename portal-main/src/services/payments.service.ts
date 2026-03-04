@@ -27,11 +27,13 @@ const getAuthHeaders = (): Record<string, string> => {
  */
 const mapPaymentToTransaction = (payment: any): Transaction => {
   const providerLabel = payment.provider === 'mtn' ? 'MTN Mobile Money' : 'Airtel Money'
+  // Force UGX currency regardless of what backend returns
+  const currency = 'UGX'
   return {
     date: payment.created_at,
     type: 'Membership Fee',
     reference: payment.transaction_reference,
-    amount: `${payment.currency} ${Number(payment.amount).toLocaleString()}`,
+    amount: `${currency} ${Number(payment.amount).toLocaleString()}`,
     method: providerLabel,
     methodIcon: null,
     status: payment.status,
@@ -46,17 +48,23 @@ const mapPaymentToTransaction = (payment: any): Transaction => {
  * @returns Promise with array of transactions
  */
 export const getPaymentHistory = async (): Promise<Transaction[]> => {
-  const response = await fetch(`${API_BASE_URL}/api/v1/payments/history/`, {
-    method: 'GET',
-    headers: getAuthHeaders(),
-  })
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/v1/payments/history/`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    })
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch payment history: ${response.status}`)
+    if (!response.ok) {
+      console.error(`Failed to fetch payment history: ${response.status}`)
+      return []
+    }
+
+    const data = await response.json()
+    return (data.results || []).map(mapPaymentToTransaction)
+  } catch (error) {
+    console.error('Error fetching payment history:', error)
+    return []
   }
-
-  const data = await response.json()
-  return (data.results || []).map(mapPaymentToTransaction)
 }
 
 /**
@@ -65,17 +73,23 @@ export const getPaymentHistory = async (): Promise<Transaction[]> => {
  * @returns Promise with array of recent transactions
  */
 export const getRecentTransactions = async (limit: number = 3): Promise<Transaction[]> => {
-  const response = await fetch(`${API_BASE_URL}/api/v1/payments/history/?limit=${limit}`, {
-    method: 'GET',
-    headers: getAuthHeaders(),
-  })
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/v1/payments/history/?limit=${limit}`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    })
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch recent transactions: ${response.status}`)
+    if (!response.ok) {
+      console.error(`Failed to fetch recent transactions: ${response.status}`)
+      return []
+    }
+
+    const data = await response.json()
+    return (data.results || []).map(mapPaymentToTransaction)
+  } catch (error) {
+    console.error('Error fetching recent transactions:', error)
+    return []
   }
-
-  const data = await response.json()
-  return (data.results || []).map(mapPaymentToTransaction)
 }
 
 /**
@@ -83,25 +97,32 @@ export const getRecentTransactions = async (limit: number = 3): Promise<Transact
  * @returns Promise with array of receipts
  */
 export const getReceipts = async (): Promise<Receipt[]> => {
-  // Derive receipts from completed payments
-  const response = await fetch(`${API_BASE_URL}/api/v1/payments/history/?status=completed`, {
-    method: 'GET',
-    headers: getAuthHeaders(),
-  })
+  try {
+    // Derive receipts from completed payments
+    const response = await fetch(`${API_BASE_URL}/api/v1/payments/history/?status=completed`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    })
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch receipts: ${response.status}`)
+    if (!response.ok) {
+      console.error(`Failed to fetch receipts: ${response.status}`)
+      return []
+    }
+
+    const data = await response.json()
+    // Force UGX currency
+    return (data.results || []).map((payment: any): Receipt => ({
+      id: payment.id,
+      title: 'Membership Fee Payment',
+      date: payment.completed_at || payment.created_at,
+      amount: `UGX ${Number(payment.amount).toLocaleString()}`,
+      type: 'receipt',
+      reference: payment.transaction_reference,
+    }))
+  } catch (error) {
+    console.error('Error fetching receipts:', error)
+    return []
   }
-
-  const data = await response.json()
-  return (data.results || []).map((payment: any): Receipt => ({
-    id: payment.id,
-    title: 'Membership Fee Payment',
-    date: payment.completed_at || payment.created_at,
-    amount: `${payment.currency} ${Number(payment.amount).toLocaleString()}`,
-    type: 'receipt',
-    reference: payment.transaction_reference,
-  }))
 }
 
 /**
