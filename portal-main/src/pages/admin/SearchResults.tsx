@@ -38,7 +38,7 @@ const SearchResults = () => {
     try {
       const token = localStorage.getItem('access_token');
       const response = await fetch(
-        `${API_V1_BASE_URL}/dashboard/search/?q=${encodeURIComponent(searchQuery)}`,
+        `${API_V1_BASE_URL}/applications/search/?q=${encodeURIComponent(searchQuery)}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
