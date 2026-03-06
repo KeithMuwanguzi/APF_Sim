@@ -65,11 +65,15 @@ class ApplicationViewSet(viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         - Allow unauthenticated POST for public application submission
-        - Require admin authentication for all other operations
+        - Member-only actions use IsMember
+        - All other operations require admin authentication
         """
         if self.action == 'create':
             # Allow anyone to create applications (public submission)
             permission_classes = [AllowPublicApplicationSubmission]
+        elif self.action == 'member_dashboard':
+            # Members can access their own dashboard
+            permission_classes = [IsAuthenticated, IsMember]
         else:
             permission_classes = [IsAuthenticated, IsAdmin]
         
@@ -811,6 +815,70 @@ class ApplicationViewSet(viewsets.ModelViewSet):
         limit = int(request.query_params.get('limit', 5))
         payments = get_recent_payments(limit)
         return Response(payments)
+
+    @swagger_auto_schema(
+        method='get',
+        operation_description="Search applications and members by name, email, or phone",
+        manual_parameters=[
+            openapi.Parameter('q', openapi.IN_QUERY, description="Search query string", type=openapi.TYPE_STRING, required=True),
+        ],
+        responses={
+            200: openapi.Response(description="Search results containing applications and members")
+        },
+        tags=['Applications'],
+    )
+    @action(detail=False, methods=['get'], url_path='search', permission_classes=[IsAuthenticated, IsAdmin])
+    def search(self, request):
+        """GET /api/v1/applications/search/ — search applications and members."""
+        from django.db.models import Q, Value, CharField
+        
+        query = request.query_params.get('q', '').strip()
+        if not query:
+            return Response({'results': []})
+        
+        results = []
+        
+        # Search applications
+        applications = Application.objects.filter(
+            Q(first_name__icontains=query) |
+            Q(last_name__icontains=query) |
+            Q(email__icontains=query) |
+            Q(username__icontains=query) |
+            Q(phone_number__icontains=query)
+        )[:20]
+        
+        for app in applications:
+            results.append({
+                'type': 'application',
+                'id': app.id,
+                'name': f"{app.first_name or ''} {app.last_name or ''}".strip() or app.username or app.email,
+                'email': app.email,
+                'status': app.status,
+                'membership_type': getattr(app, 'membership_category', ''),
+                'phone': getattr(app, 'phone_number', ''),
+                'created_at': app.submitted_at.isoformat() if app.submitted_at else None,
+            })
+        
+        # Search members (users with role=2)
+        members = User.objects.filter(
+            Q(first_name__icontains=query) |
+            Q(last_name__icontains=query) |
+            Q(email__icontains=query)
+        ).filter(role='2')[:20]
+        
+        for member in members:
+            results.append({
+                'type': 'member',
+                'id': member.id,
+                'name': f"{member.first_name or ''} {member.last_name or ''}".strip() or member.email,
+                'email': member.email,
+                'status': 'active' if member.is_active else 'inactive',
+                'membership_type': getattr(member, 'membership_category', ''),
+                'phone': '',
+                'created_at': member.created_at.isoformat() if hasattr(member, 'created_at') and member.created_at else None,
+            })
+        
+        return Response({'results': results})
 
     @swagger_auto_schema(
         method='get',

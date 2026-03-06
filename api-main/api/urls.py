@@ -63,11 +63,21 @@ def secure_media_serve(request, path):
                 return HttpResponseForbidden("Authentication required")
             user, token = auth_result
             
-            # For application documents, require admin access
+            # For application documents, allow admin or the document owner
             if path.startswith('application_documents/'):
-                if not (user.is_authenticated and user.role == '1'):
-                    logger.warning(f"Non-admin user {user.email} attempted to access: {path}")
-                    return HttpResponseForbidden("Admin access required")
+                if user.role == '1':
+                    pass  # Admin can access all
+                else:
+                    # Check if document belongs to this user's application
+                    from Documents.models import Document
+                    filename = path.split('/')[-1]
+                    owns_doc = Document.objects.filter(
+                        file__endswith=filename,
+                        application__user=user
+                    ).exists()
+                    if not owns_doc:
+                        logger.warning(f"User {user.email} attempted to access: {path}")
+                        return HttpResponseForbidden("Access denied")
             
             # For member documents, allow access to own documents or admin
             elif path.startswith('member_documents/'):

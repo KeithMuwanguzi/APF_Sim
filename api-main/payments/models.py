@@ -170,3 +170,7 @@ class PaymentConfig(models.Model):
             return Decimal('50000.00')  # Default fallback
         except (ValueError, TypeError):
             return Decimal('50000.00')  # Default fallback
+
+
+# Import webhook models so Django migration framework discovers them
+from payments.models_webhook import WebhookNotification, PaymentStatusCheck  # noqa: E402, F401
