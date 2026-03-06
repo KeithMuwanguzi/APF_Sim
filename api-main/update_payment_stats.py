@@ -37,7 +37,7 @@ def update_existing_payments():
 
 def display_revenue_stats():
     """Display current revenue statistics."""
-    from dashboard.services import get_application_statistics
+    from applications.dashboard_services import get_application_statistics
     
     print("\n" + "="*60)
     print("PAYMENT STATISTICS SUMMARY")

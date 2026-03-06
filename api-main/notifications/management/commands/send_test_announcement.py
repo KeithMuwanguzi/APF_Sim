@@ -3,8 +3,8 @@ Management command to send a test announcement to all members
 """
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
-from AdminNotifications.models import Announcement
-from AdminNotifications.services import create_in_app_notifications
+from notifications.models import Announcement
+from notifications.announcement_services import create_in_app_notifications, get_announcement_recipients
 import logging
 
 User = get_user_model()
@@ -58,7 +58,6 @@ class Command(BaseCommand):
         # Create in-app notifications
         create_in_app_notifications(announcement)
 
-        from AdminNotifications.services import get_announcement_recipients
         recipient_count = get_announcement_recipients(announcement).count()
         
         self.stdout.write(

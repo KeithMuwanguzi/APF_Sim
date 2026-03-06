@@ -1,3 +1,6 @@
+"""
+Dashboard serializers consolidated from the former dashboard app.
+"""
 from rest_framework import serializers
 
 
@@ -79,4 +82,3 @@ class MemberDashboardSerializer(serializers.Serializer):
     documents = MemberDashboardDocumentSerializer(many=True)
     recent_activity = MemberDashboardActivitySerializer(many=True)
     notifications = MemberDashboardNotificationSerializer(many=True)
-

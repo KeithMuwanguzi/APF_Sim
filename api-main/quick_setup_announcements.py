@@ -13,7 +13,7 @@ django.setup()
 
 from django.contrib.auth import get_user_model
 from django.db import connection
-from AdminNotifications.models import Announcement
+from notifications.models import Announcement
 
 User = get_user_model()
 
@@ -71,20 +71,20 @@ def check_admin_user():
         return False
 
 def check_installed_apps():
-    """Check if AdminNotifications is in INSTALLED_APPS"""
+    """Check if notifications is in INSTALLED_APPS"""
     print("\n" + "="*60)
     print("3. Checking Django Settings...")
     print("="*60)
     
     from django.conf import settings
     
-    if 'AdminNotifications' in settings.INSTALLED_APPS:
-        print("✓ AdminNotifications is in INSTALLED_APPS")
+    if 'notifications' in settings.INSTALLED_APPS:
+        print("✓ notifications is in INSTALLED_APPS")
         return True
     else:
-        print("✗ AdminNotifications NOT in INSTALLED_APPS")
+        print("✗ notifications NOT in INSTALLED_APPS")
         print("\n  FIX: Add to settings.py INSTALLED_APPS:")
-        print("  'AdminNotifications',")
+        print("  'notifications',")
         return False
 
 def check_urls():
@@ -104,7 +104,7 @@ def check_urls():
         except Resolver404:
             print("✗ Announcements URL NOT configured")
             print("\n  FIX: Add to api/urls.py:")
-            print('  path("api/v1/notifications/", include("AdminNotifications.urls")),')
+            print('  path("api/v1/notifications/", include("notifications.urls")),')
             return False
     except Exception as e:
         print(f"✗ Error checking URLs: {e}")
@@ -244,7 +244,7 @@ def main():
         print("="*60)
         print("\nPlease fix the issues above and run this script again.")
         print("\nCommon fixes:")
-        print("1. Run migrations: python manage.py migrate AdminNotifications")
+        print("1. Run migrations: python manage.py migrate notifications")
         print("2. Create admin user: python manage.py createsuperuser")
         print("3. Check settings.py and urls.py configuration")
     

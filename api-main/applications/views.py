@@ -15,12 +15,12 @@ from .serializers import ApplicationSerializer, ApplicationListSerializer
 from . import services
 from notifications.serializers import NotificationSerializer
 from authentication.permissions import AllowPublicApplicationSubmission, IsAuthenticated, IsAdmin, IsMember
-from dashboard.services import (
+from .dashboard_services import (
     get_application_statistics,
     get_recent_payments,
     get_member_dashboard_data,
 )
-from dashboard.serializers import (
+from .dashboard_serializers import (
     ApplicationStatisticsSerializer,
     MemberDashboardSerializer,
 )

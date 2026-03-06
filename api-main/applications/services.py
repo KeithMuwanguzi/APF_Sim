@@ -79,7 +79,7 @@ def approve_application(application_id):
         
         # Send welcome announcement
         try:
-            from AdminNotifications.services import send_welcome_announcement
+            from notifications.announcement_services import send_welcome_announcement
             send_welcome_announcement(app.user)
         except Exception as e:
             print(f"Error sending welcome announcement: {e}")

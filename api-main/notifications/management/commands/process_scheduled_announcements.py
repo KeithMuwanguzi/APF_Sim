@@ -3,8 +3,8 @@ Management command to process scheduled announcements
 """
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from AdminNotifications.models import Announcement
-from AdminNotifications.services import send_announcement_email, create_in_app_notifications
+from notifications.models import Announcement
+from notifications.announcement_services import send_announcement_email, create_in_app_notifications
 import logging
 
 logger = logging.getLogger(__name__)

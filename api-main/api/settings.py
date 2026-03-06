@@ -58,11 +58,9 @@ INSTALLED_APPS = [
     "Documents",
     "applications.apps.ApplicationsConfig",
     "notifications",
-    "dashboard",
     "profiles",
     "reports",
     "adminForum",
-    "AdminNotifications",
     "payments",
     "admin_management",
 ]

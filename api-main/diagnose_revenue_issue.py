@@ -13,7 +13,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'api.settings')
 django.setup()
 
 from applications.models import Application
-from dashboard.services import get_application_statistics
+from applications.dashboard_services import get_application_statistics
 import json
 
 

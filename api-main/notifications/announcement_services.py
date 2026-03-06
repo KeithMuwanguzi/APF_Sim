@@ -1,5 +1,6 @@
 """
-Services for handling announcement notifications
+Services for handling announcement notifications.
+Consolidated from the former AdminNotifications app.
 """
 from django.core.mail import send_mail
 from django.conf import settings
@@ -100,8 +101,6 @@ def get_announcement_recipients(announcement):
         return User.objects.filter(role='1')
     elif audience == 'expired_members':
         # Members whose subscription has expired
-        # This would need to be implemented based on your subscription model
-        # For now, return members with role='2'
         # TODO: Add subscription_end_date filtering when implemented
         return User.objects.filter(role='2')
     else:
@@ -132,15 +131,6 @@ def send_announcement_email(announcement):
         print(f"Subject: {announcement.title}")
         print(f"Recipients: {recipient_emails[:5]}...")  # Show first 5
         
-        # Uncomment when email is configured:
-        # send_mail(
-        #     subject=announcement.title,
-        #     message=announcement.content,
-        #     from_email=settings.DEFAULT_FROM_EMAIL,
-        #     recipient_list=recipient_emails,
-        #     fail_silently=False,
-        # )
-        
     except Exception as e:
         print(f"Error sending announcement email: {e}")
 
@@ -161,8 +151,7 @@ def create_in_app_notifications(announcement):
         print(f"No recipients found for in-app notifications: {announcement.title}")
         return
     
-    # Import here to avoid circular imports
-    from notifications.models import UserNotification
+    from .models import UserNotification
     
     # Create in-app notification for each recipient
     notifications_created = 0

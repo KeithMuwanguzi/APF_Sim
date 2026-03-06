@@ -10,7 +10,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'api.settings')
 django.setup()
 
 from django.contrib.auth import get_user_model
-from AdminNotifications.models import Announcement
+from notifications.models import Announcement
 
 User = get_user_model()
 

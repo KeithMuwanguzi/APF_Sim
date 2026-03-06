@@ -1,4 +1,9 @@
-from applications.models import Application
+"""
+Dashboard services consolidated from the former dashboard app.
+These functions provide statistics, recent data, and member dashboard
+information by querying existing models across the codebase.
+"""
+from .models import Application
 from Documents.models import Document, MemberDocument
 from authentication.models import User, UserRole
 from profiles.models import UserProfile, ProfileActivityLog
@@ -33,12 +38,9 @@ def get_application_statistics():
         total=Sum('payment_amount')
     )['total'] or Decimal('0.00')
     
-    print(f'DEBUG: Total applications with successful payments: {paid_applications}')
-    print(f'DEBUG: Calculated application revenue: {application_revenue}')
-    
     total_revenue = application_revenue
     
-    # FIX 1: Calculate last month's revenue for trend (last 30 days)
+    # Calculate last month's revenue for trend (last 30 days)
     last_month_revenue = Application.objects.filter(
         payment_status='success',
         updated_at__gte=last_month,
@@ -47,7 +49,7 @@ def get_application_statistics():
         total=Sum('payment_amount')
     )['total'] or Decimal('0.00')
     
-    # FIX 2: Last month counts for trend calculation (last 30 days)
+    # Last month counts for trend calculation (last 30 days)
     last_month_total = Application.objects.filter(
         submitted_at__gte=last_month,
         submitted_at__lte=now
@@ -159,7 +161,6 @@ def get_member_dashboard_data(user, request=None):
     member_docs = MemberDocument.objects.filter(user=user).order_by('-uploaded_at')[:10]
     documents = []
 
-    # FIX 3: Safe field mapping for both Document and MemberDocument models
     def _append_doc(doc):
         file_obj = getattr(doc, "file", None) or getattr(doc, "document", None) or getattr(doc, "document_file", None)
         file_url = None
@@ -262,7 +263,7 @@ def get_member_dashboard_data(user, request=None):
         .order_by('-created_at')[:20]
     )
     
-    # FIX 4: Helper to convert notification to activity format with complete message
+    # Helper to convert notification to activity format with complete message
     def _notif_to_activity(notif):
         # Build complete message from title and message
         text = f"{notif.title}: {notif.message}".strip() if notif.title else notif.message
@@ -336,4 +337,3 @@ def get_member_dashboard_data(user, request=None):
         "recent_activity": recent_activity,
         "notifications": notifications_data,
     }
-
